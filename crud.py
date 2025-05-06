@@ -1,5 +1,9 @@
-users = ["admin"]
-keys = ["admin"]
+#importar o json
+import json
+#arrays que armazenam dados
+users = ["admin","joao","radolfo"]
+keys = ["admin","bananilcom","lepstopirose"]
+#codigo do json
 
 def sistema(users, keys):
     while True:
@@ -29,6 +33,8 @@ def cadastrar(users, keys):
         newkey = input("*nova*senha*\n-")
         users.append(newuser)
         keys.append(newkey)
+        with open('dados.json', 'w') as f:
+            json.dump({"Users": users, "Keys": keys}, f)
         print("\n**conta*criada*com*sucesso**")
 
 def alterar_dados(users, keys):
@@ -50,15 +56,22 @@ def deletar_dados(users, keys):
         print("Usuário deletado com sucesso.")
     else:
         print("Usuário não encontrado.")
-
+'''
 def exibir_dados(users, keys):
+    carrega_users = json.load(users)
+    carrega_keys = json.load(keys)
     usuario = input("Insira o nome do usuário que deseja exibir:\n-")
     if usuario in users:
-        index = users.index(usuario)
-        print(f"Usuário: {users[index]}, Senha: {keys[index]}")
+        try:
+            with open('dados.json', 'r') as f:
+                data = json.load(f)
+                print(data)
+                return data
+        except FileNotFoundError:
+            print("Arquivo não encontrado.")
     else:
         print("Usuário não encontrado.")
-
+'''
 def listar_usuarios(users):
     print("Lista de usuários:")
     for user in users:
