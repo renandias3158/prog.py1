@@ -1,81 +1,111 @@
-#importar o json
 import json
-#arrays que armazenam dados
-users = ["admin","joao","radolfo"]
-keys = ["admin","bananilcom","lepstopirose"]
-#codigo do json
+import os
 
-def sistema(users, keys):
+DADOS_FILE = 'dados.json'
+none_usuario = "Usuário não encontrado."
+
+def carregar_dados():
+    if os.path.isfile(DADOS_FILE):
+        try:
+            with open(DADOS_FILE, 'r') as f:
+                dados = json.load(f)
+                users = dados.get("Users", [])
+                keys = dados.get("Keys", [])
+                return users, keys
+        except json.JSONDecodeError:
+            print("Erro ao ler o arquivo de dados. Inicializando base vazia.")
+            return [], []
+    else:
+        # Se o arquivo não existir, inicializa com alguns dados padrão
+        return ["admin", "joao", "radolfo"], ["admin", "bananilcom", "lepstopirose"]
+
+def salvar_dados(users, keys):
+    with open(DADOS_FILE, 'w') as f:
+        json.dump({"Users": users, "Keys": keys}, f, indent=4)
+
+def sistema():
+    users, keys = carregar_dados()
     while True:
-        new_login = input("**insira qual função deseja\n1-cadastrar\n2-alterar dados\n3-deletar dados\n4-exibir dados de um usuario\n5-listar usuarios\n6-desligar sistema\n-")
-        
-        if new_login == "1":
+        print("\nEscolha a função desejada:")
+        print("1 - Cadastrar usuário")
+        print("2 - Alterar senha")
+        print("3 - Deletar usuário")
+        print("4 - Exibir dados de um usuário")
+        print("5 - Listar usuários")
+        print("6 - Desligar sistema")
+        escolha = input("- ")
+
+        if escolha == "1":
             cadastrar(users, keys)
-        elif new_login == "2":
+            salvar_dados(users, keys)
+        elif escolha == "2":
             alterar_dados(users, keys)
-        elif new_login == "3":
+            salvar_dados(users, keys)
+        elif escolha == "3":
             deletar_dados(users, keys)
-        elif new_login == "4":
+            salvar_dados(users, keys)
+        elif escolha == "4":
             exibir_dados(users, keys)
-        elif new_login == "5":
+        elif escolha == "5":
             listar_usuarios(users)
-        elif new_login == "6":
+        elif escolha == "6":
             print("Sistema desligado.")
             break
         else:
             print("Opção inválida. Tente novamente.")
 
 def cadastrar(users, keys):
-    newuser = input("*nome*do*usuario*\n-")
+    newuser = input("Nome do usuário para cadastro: ").strip()
+    if not newuser:
+        print("Nome de usuário inválido.")
+        return
     if newuser in users:
         print("Usuário já existe.")
     else:
-        newkey = input("*nova*senha*\n-")
+        newkey = input("Digite a nova senha: ").strip()
+        if not newkey:
+            print("Senha inválida.")
+            return
         users.append(newuser)
         keys.append(newkey)
-        with open('dados.json', 'w') as f:
-            json.dump({"Users": users, "Keys": keys}, f)
-        print("\n**conta*criada*com*sucesso**")
+        print(f"Conta '{newuser}' criada com sucesso!")
 
 def alterar_dados(users, keys):
-    usuario = input("Insira o nome do usuário que deseja alterar:\n-")
+    usuario = input("Nome do usuário que deseja alterar a senha: ").strip()
     if usuario in users:
         index = users.index(usuario)
-        newkey = input("Insira a nova senha:\n-")
+        newkey = input("Digite a nova senha: ").strip()
+        if not newkey:
+            print("Senha inválida.")
+            return
         keys[index] = newkey
-        print("Senha alterada com sucesso.")
+        print(f"Senha do usuário '{usuario}' alterada com sucesso.")
     else:
-        print("Usuário não encontrado.")
+        print(none_usuario)
 
 def deletar_dados(users, keys):
-    usuario = input("Insira o nome do usuário que deseja deletar:\n-")
+    usuario = input("Nome do usuário que deseja deletar: ").strip()
     if usuario in users:
         index = users.index(usuario)
         users.pop(index)
         keys.pop(index)
-        print("Usuário deletado com sucesso.")
+        print(f"Usuário '{usuario}' deletado com sucesso.")
     else:
-        print("Usuário não encontrado.")
-'''
-def exibir_dados(users, keys):
-    carrega_users = json.load(users)
-    carrega_keys = json.load(keys)
-    usuario = input("Insira o nome do usuário que deseja exibir:\n-")
-    if usuario in users:
-        try:
-            with open('dados.json', 'r') as f:
-                data = json.load(f)
-                print(data)
-                return data
-        except FileNotFoundError:
-            print("Arquivo não encontrado.")
-    else:
-        print("Usuário não encontrado.")
-'''
-def listar_usuarios(users):
-    print("Lista de usuários:")
-    for user in users:
-        print(user)
+        print(none_usuario)
 
-sistema(users, keys)
-print('\n')
+def exibir_dados(users, keys):
+    usuario = input("Nome do usuário que deseja exibir: ").strip()
+    if usuario in users:
+        index = users.index(usuario)
+        print(f"Usuário: {usuario}")
+        print(f"Senha: {keys[index]}")
+    else:
+        print(none_usuario)
+
+def listar_usuarios(users):
+    print("Lista de usuários cadastrados:")
+    for user in users:
+        print("-", user)
+
+if __name__ == "__main__":
+    sistema()
