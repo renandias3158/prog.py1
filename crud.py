@@ -26,7 +26,7 @@ def salvar_dados(users, keys):
 def sistema():
     users, keys = carregar_dados()
     while True:
-        print("\nEscolha a função desejada:")
+        print("\nEscolha a função desejada:(insira o numero correspodente)")
         print("1 - Cadastrar usuário")
         print("2 - Alterar senha")
         print("3 - Deletar usuário")
