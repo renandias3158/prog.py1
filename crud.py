@@ -44,7 +44,7 @@ def salvar_dados(users, keys):
 
 def sistema():
     print(shrek_art)
-    print("Bem-vindo ao Sistema de Cadastro!\n")
+    print("Bem-vindo ao sherekoso sistem!\n")
     users, keys = carregar_dados()
     while True:
         print("\nEscolha a função desejada (insira o numero correspondente):")
