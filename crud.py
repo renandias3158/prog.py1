@@ -40,7 +40,7 @@ def salvar_dados(dados):
 def cadastrar(dados):
  global contador
  while contador < 1:
-    #melhoria nessa area do casdastro, porque em certos casos estva dando erro.
+    #melhoria nessa area do cadastro, porque em certos casos estva dando erro.
     user = input("Nome do usuário: ").strip()
     if user == "" or user in dados["Users"]:
         print("Usuário inválido ou já existe.")
