@@ -4,7 +4,7 @@ from datetime import datetime
 
 DADOS_FILE = 'dados.json'
 MSG_USUARIO_NAO_ENCONTRADO = "Usuário não encontrado."
-
+contador = 0
 shrek_art = r"""
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⠟⠫⢻⣿⣿⣿⣿⢟⣩⡍⣙⠛⢛⣿⣿⣿⠛⠛⠛⠛⠻⣿⣿⣿⣿⣿⡿⢿⣿
@@ -38,10 +38,13 @@ def salvar_dados(dados):
         json.dump(dados, f, indent=4)
 
 def cadastrar(dados):
+ global contador
+ while contador < 1:
     #melhoria nessa area do casdastro, porque em certos casos estva dando erro.
     user = input("Nome do usuário: ").strip()
     if user == "" or user in dados["Users"]:
         print("Usuário inválido ou já existe.")
+        cadastrar(dados)
         return
     senha = input("Senha: ").strip()
     veiculo = input("Veículo: ").strip()
@@ -51,7 +54,7 @@ def cadastrar(dados):
     dados["veiculos"].append(veiculo)
     dados["Periodos"].append(horario)
     print(f"Usuário {user} cadastrado com sucesso.")
-
+    contador += 1
 def alterar(dados):
     user = input("Usuário para alterar: ").strip()
     if user not in dados["Users"]:
