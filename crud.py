@@ -1,17 +1,17 @@
 import json
 import os
+from datetime import datetime
 
 DADOS_FILE = 'dados.json'
-none_usuario = "Usuário não encontrado."
+MSG_USUARIO_NAO_ENCONTRADO = "Usuário não encontrado."
 
-# ASCII art do Shrek para exibir na entrada do sistema
 shrek_art = r"""
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⠟⠫⢻⣿⣿⣿⣿⢟⣩⡍⣙⠛⢛⣿⣿⣿⠛⠛⠛⠛⠻⣿⣿⣿⣿⣿⡿⢿⣿
 ⣿⠤⠄⠄⠙⢿⣿⣿⣿⡿⠿⠛⠛⢛⣧⣿⠇⠄⠂⠄⠄⠄⠘⣿⣿⣿⣿⠁⠄⢻
 ⣿⣿⣿⣿⣶⣄⣾⣿⢟⣼⠒⢲⡔⣺⣿⣧⠄⠄⣠⠤⢤⡀⠄⠟⠉⣠⣤⣤⣤⣾
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⣀⣬⣵⣿⣿⣿⣶⡤⠙⠄⠘⠃⠄⣴⣾⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢻⠿⢿⣿⣿⠿⠋⠁⠄⠂⠉⠒⢘⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣟⣀⣬⣵⣿⣿⣿⣶⡤⠙⠄⠄⠘⠃⠄⣴⣾⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⡿⢻⠿⢿⣿⣿⠿⠋⠁⠄⠄⠂⠉⠒⢘⣿⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⡿⣡⣷⣶⣤⣤⣀⡀⠄⠄⠄⠄⠄⠄⠄⣾⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⡿⣸⣿⣿⣿⣿⣿⣿⣿⣷⣦⣰⠄⠄⠄⠄⢾⠿⢿⣿⣿⣿⣿
 ⣿⡿⠋⣡⣾⣿⣿⣿⡟⠉⠉⠈⠉⠉⠉⠉⠉⠉⠄⠄⠄⠑⠄⠄⠐⡇⠄⠈⠙⠛⠋
@@ -25,117 +25,133 @@ shrek_art = r"""
 
 def carregar_dados():
     if os.path.isfile(DADOS_FILE):
-        try:
-            with open(DADOS_FILE, 'r') as f:
+        with open(DADOS_FILE, 'r') as f:
+            try:
                 dados = json.load(f)
-                users = dados.get("Users", [])
-                keys = dados.get("Keys", [])
-                carros = dados.get("veiculos", [])
-                return users, keys, carros
-        except json.JSONDecodeError:
-            print("Erro ao ler o arquivo de dados. Inicializando base vazia.")
-            return [], [], []
-    else:
-        # Se o arquivo não existir, inicializa com alguns dados padrão
-        return ["admin", "joao", "radolfo"], ["admin", "bananilcom", "lepstopirose"], ["opala", "maverick", "uno com escada"]
-
-def salvar_dados(users, keys, carros):
+                return dados
+            except:
+                print("Erro ao ler dados. Inicializando vazio.")
+    return {"Users": [], "Keys": [], "Veiculos": [], "Periodos": []}
+#por motivos de simplificação, eu prefiri adicionar e carregar todas as informações em apenas um array, permitindo qeu o codigo ficasse mais simples.
+def salvar_dados(dados):
     with open(DADOS_FILE, 'w') as f:
-        json.dump({"Users": users, "Keys": keys, "veiculos": carros}, f, indent=4)
+        json.dump(dados, f, indent=4)
 
+def cadastrar(dados):
+    #melhoria nessa area do casdastro, porque em certos casos estva dando erro.
+    user = input("Nome do usuário: ").strip()
+    if user == "" or user in dados["Users"]:
+        print("Usuário inválido ou já existe.")
+        return
+    senha = input("Senha: ").strip()
+    veiculo = input("Veículo: ").strip()
+    horario = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    dados["Users"].append(user)
+    dados["Keys"].append(senha)
+    dados["veiculos"].append(veiculo)
+    dados["Periodos"].append(horario)
+    print(f"Usuário {user} cadastrado com sucesso.")
+
+def alterar(dados):
+    user = input("Usuário para alterar: ").strip()
+    if user not in dados["Users"]:
+        print(MSG_USUARIO_NAO_ENCONTRADO)
+        return
+    idx = dados["Users"].index(user)
+    #idx, é basicamente é o index que vai ser usado para buscar o os dados no Json, para depois alterar ou pagar a divida.
+    nova_senha = input("Nova senha (deixe vazio para manter): ").strip()
+    novo_veiculo = input("Novo veículo (deixe vazio para manter): ").strip()
+    if nova_senha:
+        dados["Keys"][idx] = nova_senha
+    if novo_veiculo:
+        dados["Veiculos"][idx] = novo_veiculo
+    print("Dados atualizados.")
+
+def deletar(dados):
+    user = input("Usuário para deletar: ").strip()
+    if user not in dados["Users"]:
+        print(MSG_USUARIO_NAO_ENCONTRADO)
+        return
+    idx = dados["Users"].index(user)
+    for chave in ["Users", "Keys", "veiculos", "Periodos"]:
+        dados[chave].pop(idx)
+        #Aqui ela apaga o usuario com seus respectivos dados no Json.
+    print(f"Usuário {user} deletado.")
+
+def exibir(dados):
+    user = input("Usuário para exibir: ").strip()
+    if user not in dados["Users"]:
+        print(MSG_USUARIO_NAO_ENCONTRADO)
+        return
+    idx = dados["Users"].index(user)
+    print(f"Usuário: {user}")
+    print(f"Senha: {dados['Keys'][idx]}")
+    print(f"Veículo: {dados['veiculos'][idx]}")
+    print(f"Horário de registro: {dados['Periodos'][idx]}")
+#esse foi um tanto complicado de fazer só com um array multi-dimensional, mas, depois de um certo esforço e tempo, eu consegui.
+def listar(dados):
+    if not dados["Users"]:
+        print("Nenhum usuário cadastrado.")
+        return
+    print("Usuários cadastrados:")
+    for u in dados["Users"]:
+        print("-", u)
+#esse provavelmente foi a mais fácil de fazer, porque ele só lista os usuarios cadastrados.
+def calcular_divida(horario_str):
+    fmt = "%Y-%m-%d %H:%M:%S"
+    try:
+        horario = datetime.strptime(horario_str, fmt)
+        agora = datetime.now()
+        horas = (agora - horario).total_seconds() / 3600
+        valor = 10 * horas
+        return max(valor, 0)
+    except:
+        return 0
+#A função de calcular divida foi de fato a mais complicada de fazer, porque tive problemas tanto para armazenar quantopara puxar o valor do Json, mas ainda bem que existe o youtube para isso.
+def divida(dados):
+    user = input("Usuário para calcular dívida: ").strip()
+    if user not in dados["Users"]:
+        print(MSG_USUARIO_NAO_ENCONTRADO)
+        return
+    idx = dados["Users"].index(user)
+    valor = calcular_divida(dados["Periodos"][idx])
+    print(f"Dívida do usuário {user}: R$ {valor:.2f}")
+#essa função é basicamente a mesma coisa que a de exibir, mas com o valor da divida, e com o valor do horario de registro.
 def sistema():
+    #essa função foi a amis simples de fazer, porque ela só chama as outras funções e faz o menu.
     print(shrek_art)
-    print("Bem-vindo ao sherekoso sistem!\n")
-    users, keys, carros = carregar_dados()
-    while True:
-        print("\nEscolha a função desejada (insira o numero correspondente):")
-        print("1 - Cadastrar usuário")
-        print("2 - Alterar senha")
-        print("3 - Deletar usuário")
-        print("4 - Exibir dados de um usuário")
-        print("5 - Listar usuários")
-        print("6 - Desligar sistema")
-        escolha = input("- ")
+    print("Bem-vindo ao sistema do estacionamento do Shrekoso!\n")
+    dados = carregar_dados()
 
+    while True:
+        print("\nEscolha uma opção:")
+        print("1 - Cadastrar usuário")
+        print("2 - Alterar dados do usuário")
+        print("3 - Deletar usuário")
+        print("4 - Exibir dados do usuário")
+        print("5 - Listar usuários")
+        print("6 - Calcular dívida")
+        print("7 - Sair")
+
+        escolha = input("> ").strip()
         if escolha == "1":
-            cadastrar(users, keys, carros)
-            salvar_dados(users, keys, carros)
+            cadastrar(dados)
         elif escolha == "2":
-            alterar_dados(users, keys, carros)
-            salvar_dados(users, keys, carros)
+            alterar(dados)
         elif escolha == "3":
-            deletar_dados(users, keys, carros)
-            salvar_dados(users, keys, carros)
+            deletar(dados)
         elif escolha == "4":
-            exibir_dados(users, keys, carros)
+            exibir(dados)
         elif escolha == "5":
-            listar_usuarios(users)
+            listar(dados)
         elif escolha == "6":
+            divida(dados)
+        elif escolha == "7":
+            salvar_dados(dados)
             print("Sistema desligado.")
-            salvar_dados(users, keys, carros)
             break
         else:
             print("Opção inválida. Tente novamente.")
 
-def cadastrar(users, keys, carros):
-    newuser = input("Nome do usuário para cadastro: ").strip()
-    if not newuser:
-        print("Nome de usuário inválido.")
-        return
-    if newuser in users:
-        print("Usuário já existe.")
-    else:
-        newkey = input("Digite a nova senha: ").strip()
-        newcar = input("insira o carro: ")
-        if not newkey:
-            print("Senha inválida.")
-            return
-        users.append(newuser)
-        keys.append(newkey)
-        carros.append(newcar)
-        print(f"Conta '{newuser}' criada com sucesso!")
-
-def alterar_dados(users, keys, carros):
-    usuario = input("Nome do usuário que deseja alterar a senha: ").strip()
-    if usuario in users:
-        index = users.index(usuario)
-        newkey = input("Digite a nova senha: ").strip()
-        if not newkey:
-            print("Senha inválida.")
-        else:
-            newcar = input("insira o novo carro").strip()
-            carros[index] = newcar
-            return
-        keys[index] = newkey
-        print(f"Dados do usuário '{usuario}' alterada com sucesso.")
-    else:
-        print(none_usuario)
-
-def deletar_dados(users, keys, carros):
-    usuario = input("Nome do usuário que deseja deletar: ").strip()
-    if usuario in users:
-        index = users.index(usuario)
-        users.pop(index)
-        keys.pop(index)
-        carros.pop(index)
-        print(f"Usuário '{usuario}' deletado com sucesso.")
-    else:
-        print(none_usuario)
-
-def exibir_dados(users, keys, carros):
-    usuario = input("Nome do usuário que deseja exibir: ").strip()
-    if usuario in users:
-        index = users.index(usuario)
-        print(f"Usuário: {usuario}")
-        print(f"Senha: {keys[index]}")
-        print(f"Veiculo: {carros[index]}")
-    else:
-        print(none_usuario)
-def listar_usuarios(users):
-    print("Lista de usuários cadastrados:")
-    for user in users:
-        print("-", user)
-
 if __name__ == "__main__":
     sistema()
-
