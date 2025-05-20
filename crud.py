@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+import time
 
 DADOS_FILE = 'dados.json'
 MSG_USUARIO_NAO_ENCONTRADO = "Usuário não encontrado."
@@ -8,19 +9,19 @@ contador = 0
 shrek_art = r"""
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 ⣿⠟⠫⢻⣿⣿⣿⣿⢟⣩⡍⣙⠛⢛⣿⣿⣿⠛⠛⠛⠛⠻⣿⣿⣿⣿⣿⡿⢿⣿
-⣿⠤⠄⠄⠙⢿⣿⣿⣿⡿⠿⠛⠛⢛⣧⣿⠇⠄⠂⠄⠄⠄⠘⣿⣿⣿⣿⠁⠄⢻
+⣿⠤⠄⠄⠙⢿⣿⣿⣿⡿⠿⠛⠛⢛⣧⣿⠇⠄⠄⠂⠄⠄⠄⣿⣿⣿⣿⠁⠄⢻
 ⣿⣿⣿⣿⣶⣄⣾⣿⢟⣼⠒⢲⡔⣺⣿⣧⠄⠄⣠⠤⢤⡀⠄⠟⠉⣠⣤⣤⣤⣾
 ⣿⣿⣿⣿⣿⣿⣿⣿⣟⣀⣬⣵⣿⣿⣿⣶⡤⠙⠄⠄⠘⠃⠄⣴⣾⣿⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⡿⢻⠿⢿⣿⣿⠿⠋⠁⠄⠄⠂⠉⠒⢘⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⡿⢻⠿⢿⣿⣿⠿⠋⠁⠄⠄⠄⠄⠄⠄⢘⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⣿⡿⣡⣷⣶⣤⣤⣀⡀⠄⠄⠄⠄⠄⠄⠄⣾⣿⣿⣿⣿⣿⣿
 ⣿⣿⣿⣿⣿⣿⣿⡿⣸⣿⣿⣿⣿⣿⣿⣿⣷⣦⣰⠄⠄⠄⠄⢾⠿⢿⣿⣿⣿⣿
-⣿⡿⠋⣡⣾⣿⣿⣿⡟⠉⠉⠈⠉⠉⠉⠉⠉⠉⠄⠄⠄⠑⠄⠄⠐⡇⠄⠈⠙⠛⠋
+⣿⡿⠋⣡⣾⣿⣿⣿⡟⠉⠉⠈⠉⠉⠉⠉⠉⠉⠄⠄⠄⠄⠄⠄⠐⡇⠄⠈⠙⠛⠋
 ⠋⠄⣾⣿⣿⣿⣿⡿⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢠⡇⠄⠄⠄⠄⠄
-⠄⢸⣿⣿⣿⣿⣿⣯⠄⢠⡀⠄⠄⠄⠄⠄⠄⠄⠄⣀⠄⠄⠄⠄⠁⠄⠄⠄⠄⠄
+⠄⢸⣿⣿⣿⣿⣿⣯⠄⢠⡀⠄⠄⠄⠄⠄⠄⠄⣀⠄⠄⠄⠄⠄⠁⠄⠄⠄⠄⠄
 ⠁⢸⣿⣿⣿⣿⣿⣯⣧⣬⣿⣤⣐⣂⣄⣀⣠⡴⠖⠈⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄
 ⠈⠈⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿⣽⣉⡉⠉⠈⠁⠄⠁⠄⠄⠄⠄⡂⠄⠄⠄⠄⠄
 ⠄⠄⠙⣿⣿⠿⣿⣿⣿⣿⣷⡤⠈⠉⠉⠁⠄⠄⠄⠄⠄⠄⠄⠠⠔⠄⠄⠄⠄⠄
-⠄⠄⠄⡈⢿⣷⣿⣿⢿⣿⣿⣷⡦⢤⡀⠄⠄⠄⠄⠄⠄⢐⣠⡿⠁⠄⠄⠄⠄⠄
+⠄⠄⠄⡈⢿⣷⣿⣿⢿⣿⣿⣷⡦⢤⡀⠄⠄⠄⠄⠄⠄⠄⢐⣠⡿⠁⠄⠄⠄⠄
 """
 
 def carregar_dados():
@@ -31,55 +32,66 @@ def carregar_dados():
                 return dados
             except:
                 print("Erro ao ler dados. Inicializando vazio.")
-    return {"Users": [], "Keys": [], "Veiculos": [], "Periodos": []}
-#por motivos de simplificação, eu prefiri adicionar e carregar todas as informações em apenas um array, permitindo qeu o codigo ficasse mais simples.
+    return {"Users": [], "Keys": [], "veiculos": [], "Periodos": [], "Categorias": []}
+
 def salvar_dados(dados):
     with open(DADOS_FILE, 'w') as f:
         json.dump(dados, f, indent=4)
 
+def categorizar(dados):
+    print("Serviços disponíveis:\n - Econômico: 10.0 reais, sem limpeza \n - Premium: 25.00 reais, com limpeza e lustração!")
+    separar = input("Qual serviço você deseja? (insira 1 para Econômico e 2 para Premium):\n- ")
+    if separar == "1":
+        dados["Categorias"].append("1")  # Armazenar "1" para Econômico
+        print("Cadastro realizado com sucesso!")
+    elif separar == "2":
+        dados["Categorias"].append("2")  # Armazenar "2" para Premium
+        print("Cadastro realizado com sucesso!")
+    else:
+        print("Cadastro inválido")
+
 def cadastrar(dados):
- global contador
- while contador < 1:
-    #melhoria nessa area do cadastro, porque em certos casos estva dando erro.
-    user = input("Nome do usuário: ").strip()
-    if user == "" or user in dados["Users"]:
-        print("Usuário inválido ou já existe.")
-        cadastrar(dados)
-        return
-    senha = input("Senha: ").strip()
-    veiculo = input("Veículo: ").strip()
-    horario = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    dados["Users"].append(user)
-    dados["Keys"].append(senha)
-    dados["veiculos"].append(veiculo)
-    dados["Periodos"].append(horario)
-    print(f"Usuário {user} cadastrado com sucesso.")
-    contador += 1
+    global contador
+    while contador < 1:
+        user = input("Nome do usuário: ").strip()
+        if user == "" or user in dados["Users"]:
+            print("Usuário inválido ou já existe.")
+            return
+        senha = input("Senha: ").strip()
+        veiculo = input("Veículo: ").strip()
+        horario = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        dados["Users"].append(user)
+        dados["Keys"].append(senha)
+        dados["veiculos"].append(veiculo)
+        dados["Periodos"].append(horario)
+        categorizar(dados)
+        contador += 1
+
 def alterar(dados):
     user = input("Usuário para alterar: ").strip()
     if user not in dados["Users"]:
         print(MSG_USUARIO_NAO_ENCONTRADO)
         return
     idx = dados["Users"].index(user)
-    #idx, é basicamente é o index que vai ser usado para buscar o os dados no Json, para depois alterar ou pagar a divida.
     nova_senha = input("Nova senha (deixe vazio para manter): ").strip()
     novo_veiculo = input("Novo veículo (deixe vazio para manter): ").strip()
     if nova_senha:
         dados["Keys"][idx] = nova_senha
     if novo_veiculo:
-        dados["Veiculos"][idx] = novo_veiculo
+        dados["veiculos"][idx] = novo_veiculo
     print("Dados atualizados.")
 
-def deletar(dados):
-    user = input("Usuário para deletar: ").strip()
+def pagar_divida(dados):
+    user = input("Usuário com dívida a ser paga: ").strip()
     if user not in dados["Users"]:
         print(MSG_USUARIO_NAO_ENCONTRADO)
         return
     idx = dados["Users"].index(user)
-    for chave in ["Users", "Keys", "veiculos", "Periodos"]:
+    for chave in ["Users", "Keys", "veiculos", "Periodos", "Categorias"]:
         dados[chave].pop(idx)
-        #Aqui ela apaga o usuario com seus respectivos dados no Json.
-    print(f"Usuário {user} deletado.")
+    print("Pagando....")
+    time.sleep(3)  
+    print(f"Dívida do {user} paga.")
 
 def exibir(dados):
     user = input("Usuário para exibir: ").strip()
@@ -91,7 +103,11 @@ def exibir(dados):
     print(f"Senha: {dados['Keys'][idx]}")
     print(f"Veículo: {dados['veiculos'][idx]}")
     print(f"Horário de registro: {dados['Periodos'][idx]}")
-#esse foi um tanto complicado de fazer só com um array multi-dimensional, mas, depois de um certo esforço e tempo, eu consegui.
+    if dados['Categorias'][idx] == "1":
+        print("Serviço escolhido: Econômico")
+    elif dados['Categorias'][idx] == "2":
+        print("Serviço escolhido: Premium")
+
 def listar(dados):
     if not dados["Users"]:
         print("Nenhum usuário cadastrado.")
@@ -99,29 +115,35 @@ def listar(dados):
     print("Usuários cadastrados:")
     for u in dados["Users"]:
         print("-", u)
-#esse provavelmente foi a mais fácil de fazer, porque ele só lista os usuarios cadastrados.
-def calcular_divida(horario_str):
+
+def calcular_divida(horario_str, categoria):
     fmt = "%Y-%m-%d %H:%M:%S"
     try:
         horario = datetime.strptime(horario_str, fmt)
         agora = datetime.now()
         horas = (agora - horario).total_seconds() / 3600
-        valor = 10 * horas
+        if categoria == "1":  # Econômico
+            valor_hora = 10.0
+        elif categoria == "2":  # Premium
+            valor_hora = 25.0
+        else:
+            valor_hora = 10.0  # Default para econômico
+        valor = valor_hora * horas
         return max(valor, 0)
     except:
         return 0
-#A função de calcular divida foi de fato a mais complicada de fazer, porque tive problemas tanto para armazenar quantopara puxar o valor do Json, mas ainda bem que existe o youtube para isso.
+
 def divida(dados):
     user = input("Usuário para calcular dívida: ").strip()
     if user not in dados["Users"]:
         print(MSG_USUARIO_NAO_ENCONTRADO)
         return
     idx = dados["Users"].index(user)
-    valor = calcular_divida(dados["Periodos"][idx])
+    categoria = dados["Categorias"][idx]
+    valor = calcular_divida(dados["Periodos"][idx], categoria)
     print(f"Dívida do usuário {user}: R$ {valor:.2f}")
-#essa função é basicamente a mesma coisa que a de exibir, mas com o valor da divida, e com o valor do horario de registro.
+
 def sistema():
-    #essa função foi a amis simples de fazer, porque ela só chama as outras funções e faz o menu.
     print(shrek_art)
     print("Bem-vindo ao sistema do estacionamento do Shrekoso!\n")
     dados = carregar_dados()
@@ -130,7 +152,7 @@ def sistema():
         print("\nEscolha uma opção:")
         print("1 - Cadastrar usuário")
         print("2 - Alterar dados do usuário")
-        print("3 - Deletar usuário")
+        print("3 - Pagar dívida do usuário")
         print("4 - Exibir dados do usuário")
         print("5 - Listar usuários")
         print("6 - Calcular dívida")
@@ -138,11 +160,13 @@ def sistema():
 
         escolha = input("> ").strip()
         if escolha == "1":
+            global contador
+            contador = 0
             cadastrar(dados)
         elif escolha == "2":
             alterar(dados)
         elif escolha == "3":
-            deletar(dados)
+            pagar_divida(dados)
         elif escolha == "4":
             exibir(dados)
         elif escolha == "5":
